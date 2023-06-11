@@ -1,0 +1,170 @@
+using System;
+using System.Collections.Generic;
+
+public interface ITatli
+{
+    string Isim { get; set; }
+    decimal Fiyat { get; set; }
+
+    void FiyatGuncelle(decimal yeniFiyat);
+}
+
+public class Tatli : ITatli
+{
+    protected string isim;
+    protected decimal fiyat;
+
+    public Tatli(string isim, decimal fiyat)
+    {
+        this.isim = isim;
+        this.fiyat = fiyat;
+    }
+
+    public Tatli(string isim) : this(isim, 0m)
+    {
+    }
+
+    public string Isim
+    {
+        get { return isim; }
+        set { isim = value; }
+    }
+
+    public decimal Fiyat
+    {
+        get { return fiyat; }
+        set { fiyat = value; }
+    }
+
+    public virtual void FiyatGuncelle(decimal yeniFiyat)
+    {
+        this.fiyat = yeniFiyat;
+    }
+}
+
+public class Serbetli : Tatli
+{
+    public Serbetli(string isim, decimal fiyat) : base(isim, fiyat)
+    {
+    }
+}
+
+public class Tatlici
+{
+    public List<ITatli> tatlilar = new List<ITatli>();
+
+    public void TatliEkle(ITatli tatli)
+    {
+        tatlilar.Add(tatli);
+    }
+
+    public void TatliSil(ITatli tatli)
+    {
+        tatlilar.Remove(tatli);
+    }
+
+    public void TatlilariListele()
+    {
+        foreach (var tatli in tatlilar)
+        {
+            Console.WriteLine($"İsim: {tatli.Isim}, Fiyat: {tatli.Fiyat}");
+        }
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        Tatlici tatlici = new Tatlici();
+        tatlici.TatliEkle(new Tatli("Sutlac", 25m));
+        tatlici.TatliEkle(new Tatli("Baklava", 110m));
+
+        while (true)
+        {
+            Console.WriteLine("Lütfen bir seçenek girin:");
+            Console.WriteLine("1 - Tatlı Ekle");
+            Console.WriteLine("2 - Tatlı Sil");
+            Console.WriteLine("3 - Fiyat Güncelle");
+            Console.WriteLine("4 - Tatlıları Listele");
+            Console.WriteLine("0 - Çıkış");
+
+            int secenek = Convert.ToInt32(Console.ReadLine());
+            string isim;
+            decimal fiyat;
+
+            switch (secenek)
+            {
+                case 1:
+                    Console.WriteLine("Lütfen tatlı ismini girin:");
+                    isim = Console.ReadLine();
+                    Console.WriteLine("Lütfen fiyatı girin:");
+                    fiyat = Convert.ToDecimal(Console.ReadLine());
+                    Console.WriteLine("Tatlı şerbetli mi? (Evet/Hayir)");
+                    string serbetliMi = Console.ReadLine();
+
+                    if (serbetliMi.ToLower() == "evet")
+                    {
+                        tatlici.TatliEkle(new Serbetli(isim, fiyat));
+                    }
+                    else
+                    {
+                        tatlici.TatliEkle(new Tatli(isim, fiyat));
+                    }
+                    break;
+
+                case 2:
+                    Console.WriteLine("Lütfen silmek istediğiniz tatlı ismini girin:");
+                    isim = Console.ReadLine();
+
+                    ITatli silinecekTatli = null;
+                    foreach (var tatli in tatlici.tatlilar)
+                    {
+                        if (tatli.Isim.ToLower() == isim.ToLower())
+                        {
+                            silinecekTatli = tatli;
+                            break;
+                        }
+                    }
+                    if (silinecekTatli != null)
+                    {
+                        tatlici.TatliSil(silinecekTatli);
+                        Console.WriteLine("Tatlı silindi.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Bu isimde bir tatlı bulunamadı.");
+                    }
+                    break;
+
+                case 3:
+                    Console.WriteLine("Lütfen fiyatını güncellemek istediğiniz tatlı ismini girin:");
+                    isim = Console.ReadLine();
+                    Console.WriteLine("Lütfen yeni fiyatı girin:");
+                    fiyat = Convert.ToDecimal(Console.ReadLine());
+
+                    foreach (var tatli in tatlici.tatlilar)
+                    {
+                        if (tatli.Isim.ToLower() == isim.ToLower())
+                        {
+                            tatli.FiyatGuncelle(fiyat);
+                            Console.WriteLine("Fiyat güncellendi.");
+                            break;
+                        }
+                    }
+                    break;
+
+                case 4:
+                    tatlici.TatlilariListele();
+                    break;
+
+                case 0:
+                    return;
+
+                default:
+                    Console.WriteLine("Lütfen geçerli bir seçenek girin.");
+                    break;
+            }
+        }
+    }
+}
